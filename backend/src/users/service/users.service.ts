@@ -1,22 +1,17 @@
 import { User } from './../schema/user.schema';
 import { UserRepository } from './../repositories/user.repository';
-import { CreateUserDto } from '../../auth/dto/CreateUser.dto';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
     constructor(private userRepository: UserRepository) {}
 
-    async create(createUserDto: CreateUserDto): Promise<User> {
-        return await this.userRepository.create(createUserDto);
-    }
-
     async findAll(): Promise<User[]> {
-        return await this.userRepository.find({});
+        return await this.userRepository.find({}, { password: 0 });
     }
 
     async findOne(id: string): Promise<User> {
-        return await this.userRepository.findOne({ id });
+        return await this.userRepository.findOne({ id }, { password: 0 });
     }
 
     async removeById(id: string): Promise<Boolean> {
