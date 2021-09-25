@@ -1,24 +1,21 @@
-import { InjectModel } from '@nestjs/mongoose';
 import { ConflictException, Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
 import { CreateUserDto } from '../dto/CreateUser.dto';
 import { IUser } from '../../users/interface/user.interface';
 import { JwtService } from '@nestjs/jwt';
 
 import * as bcrypt from 'bcryptjs';
+import { AuthRepository } from '../repositories/auth.repository';
 
 @Injectable()
 export class AuthService {
     constructor(
-        @InjectModel('USER') private userModel: Model<IUser>,
+        private authRepository: AuthRepository,
         private jwtService: JwtService
     ) {}
 
     async signUp(createUserDto: CreateUserDto): Promise<IUser> {
-        const user = new this.userModel(createUserDto);
-
         try {
-            return await user.save();
+            return await this.authRepository.create(createUserDto);
         } catch (error) {
             if (error.code === 11000) {
                 throw new ConflictException('User already exists');
@@ -36,7 +33,7 @@ export class AuthService {
     }
 
     async validateUser(username: string, pass: string): Promise<IUser> {
-        const user = await this.userModel.findOne({ username });
+        const user = await this.authRepository.findOne({ username });
 
         if (!user) {
             return null;

@@ -9,6 +9,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt-auth.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { ConfigModule } from '@nestjs/config';
+import { AuthRepository } from './repositories/auth.repository';
 
 @Module({
     imports: [
@@ -20,7 +21,7 @@ import { ConfigModule } from '@nestjs/config';
             signOptions: { expiresIn: `${process.env.EXPIRES_IN}` }
         })
     ],
-    providers: [AuthService, LocalStrategy, JwtStrategy],
+    providers: [AuthRepository, AuthService, LocalStrategy, JwtStrategy],
     controllers: [AuthController],
     exports: [AuthService]
 })
