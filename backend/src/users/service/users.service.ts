@@ -1,3 +1,4 @@
+import { IUser } from 'src/users/interface/user.interface';
 import { User } from './../schema/user.schema';
 import { UserRepository } from './../repositories/user.repository';
 import { Injectable } from '@nestjs/common';

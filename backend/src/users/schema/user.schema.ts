@@ -1,7 +1,8 @@
+import { UserRole } from './../interface/user.interface';
+import { Channel } from './../../chat/channel/channel.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
-import { UserRole } from '../interface/user.interface';
 
 export type UserDocument = User & Document;
 
@@ -19,7 +20,7 @@ export class User {
     @Prop({ required: true })
     password: string;
 
-    @Prop({ type: 'string', enum: UserRole, default: UserRole.USER })
+    @Prop({ type: 'string', enum: UserRole, default: UserRole?.USER || 'user' })
     role: UserRole;
 
     @Prop({ default: null })
@@ -36,6 +37,15 @@ export class User {
 
     @Prop({ default: null })
     updatedAt: Date;
+
+    @Prop({ default: [] })
+    favoriteChannels: Channel[];
+
+    @Prop({ default: [] })
+    createdChannels: Channel[];
+
+    @Prop({ default: [] })
+    channels: Channel[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -7,6 +7,7 @@ import {
     MaxLength,
     MinLength
 } from 'class-validator';
+import { Channel } from 'src/chat/channel/channel.schema';
 
 export class CreateUserDto {
     @IsString()
@@ -27,9 +28,15 @@ export class CreateUserDto {
     })
     readonly password: string;
 
-    @IsPhoneNumber()
     readonly phoneNumber: string;
 
     readonly timeZone: string;
-    readonly role: UserRole;
+    //readonly role: UserRole;
+
+    readonly occupation?: string;
+    // readonly createdAt?: Date;
+    // readonly updatedAt?: Date;
+    // readonly channels: Array<Channel>;
+    // readonly createdChannels: Array<Channel>;
+    // readonly favoriteChannels: Array<Channel>;
 }
