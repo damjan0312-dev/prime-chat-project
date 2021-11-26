@@ -1,3 +1,4 @@
+import { User } from './../../users/schema/user.schema';
 import { ChannelRepository } from './channel.repository';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { IUser } from '../../users/interface/user.interface';
@@ -14,6 +15,8 @@ import {
 import { Channel } from './channel.schema';
 import { HttpErrorCode } from 'src/utils/enums/httpErrorCode.enum';
 
+import * as mongoose from 'mongoose';
+
 @Injectable()
 export class ChannelService {
     constructor(
@@ -22,31 +25,27 @@ export class ChannelService {
         private readonly userRepository: UserRepository
     ) {}
 
-    async create(data: IChannel, user: IUser) {
+    async create(data: Channel, user: User) {
         const channel = new Channel();
+        channel._id = new mongoose.Types.ObjectId(data._id);
         channel.name = data.name;
         channel.purpose = data.purpose;
         channel.private = data.private;
         channel.createdBy = user;
-        channel.users = [user];
+        //channel.users = [user];
 
-        return await this.channelRepository.create(data);
+        console.log(channel);
+        return await this.channelRepository.create(channel);
     }
 
     async findAll(req) {
         try {
-            let userChannels = await this.channelRepository.findUserChannels(
-                req.user._id
-            );
-            let favoriteChannels =
+            let userChannels: Channel[] =
+                await this.channelRepository.findUserChannels(req.user._id);
+            let favoriteChannels: Channel[] =
                 await this.channelRepository.findUserFavoriteChannels(
                     req.user._id
                 );
-
-            // Remove users information from user channels
-            // userChannels = userChannels.map(
-            //     ({ users, ...attributes }) => attributes
-            // );
 
             return {
                 favorites: favoriteChannels,

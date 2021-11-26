@@ -1,3 +1,4 @@
+import { Channel } from 'src/chat/channel/channel.schema';
 import {
     Controller,
     UseGuards,
@@ -24,7 +25,7 @@ export class ChannelController {
     constructor(private readonly channelService: ChannelService) {}
 
     @Post()
-    async create(@Body() body: IChannel, @Req() req) {
+    async create(@Body() body: Channel, @Req() req) {
         return await this.channelService.create(body, req.user);
     }
 

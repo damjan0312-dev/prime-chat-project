@@ -1,12 +1,17 @@
 import { IUser } from '../../users/interface/user.interface';
+import { UserSchema, User } from './../../users/schema/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as mongoose from 'mongoose';
+import { Type } from 'class-transformer';
 
 export type ChannelDocument = Channel & Document;
 
-@Schema()
+@Schema({ _id: false })
 export class Channel {
+    @Prop({ type: [mongoose.Types.ObjectId] })
+    _id: mongoose.Types.ObjectId;
+
     @Prop({ required: true, length: 24 })
     name: string;
 
@@ -16,16 +21,17 @@ export class Channel {
     @Prop({ required: true, default: true })
     private: boolean;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'USER' })
-    createdBy: IUser;
+    @Prop({ type: [mongoose.Types.ObjectId], ref: User.name })
+    createdBy: User;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'USER' })
-    users: IUser[];
+    // @Prop({ type: UserSchema, default: [] })
+    // @Type(() => User)
+    // users: User[];
 
-    @Prop({ required: true, default: Date.now() })
+    @Prop({ default: Date.now() })
     createdAt: Date;
 
-    @Prop({ required: true, default: Date.now() })
+    @Prop({ default: Date.now() })
     updatedAt: Date;
 }
 

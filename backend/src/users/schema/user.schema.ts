@@ -3,11 +3,15 @@ import { Channel } from './../../chat/channel/channel.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
+import * as mongoose from 'mongoose';
 
 export type UserDocument = User & Document;
 
-@Schema()
+@Schema({ _id: false })
 export class User {
+    @Prop({ type: mongoose.Types.ObjectId })
+    _id: mongoose.Types.ObjectId;
+
     @Prop({ required: true })
     fullname: string;
 
