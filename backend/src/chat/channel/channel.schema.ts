@@ -9,7 +9,7 @@ export type ChannelDocument = Channel & Document;
 
 @Schema({ _id: false })
 export class Channel {
-    @Prop({ type: [mongoose.Types.ObjectId] })
+    @Prop({ type: mongoose.Types.ObjectId })
     _id: mongoose.Types.ObjectId;
 
     @Prop({ required: true, length: 24 })
@@ -21,8 +21,8 @@ export class Channel {
     @Prop({ required: true, default: true })
     private: boolean;
 
-    @Prop({ type: [mongoose.Types.ObjectId], ref: User.name })
-    createdBy: User;
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'USER' })
+    createdBy: mongoose.Types.ObjectId;
 
     // @Prop({ type: UserSchema, default: [] })
     // @Type(() => User)

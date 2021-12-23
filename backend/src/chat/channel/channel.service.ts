@@ -3,7 +3,7 @@ import { ChannelRepository } from './channel.repository';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { IUser } from '../../users/interface/user.interface';
 import { UsersService } from './../../users/service/users.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Req } from '@nestjs/common';
 import { IChannel } from './channel.interface';
 import {
     omitBy,
@@ -14,7 +14,6 @@ import {
 } from 'lodash';
 import { Channel } from './channel.schema';
 import { HttpErrorCode } from 'src/utils/enums/httpErrorCode.enum';
-
 import * as mongoose from 'mongoose';
 
 @Injectable()
@@ -31,86 +30,68 @@ export class ChannelService {
         channel.name = data.name;
         channel.purpose = data.purpose;
         channel.private = data.private;
-        channel.createdBy = user;
+        channel.createdBy = user._id;
         //channel.users = [user];
-
-        console.log(channel);
         return await this.channelRepository.create(channel);
     }
 
-    async findAll(req) {
+    /**
+     * @param req Contains needed user details
+     * @returns All channels created by the currently logged in user
+     */
+    async findAll(@Req() req) {
         try {
-            let userChannels: Channel[] =
-                await this.channelRepository.findUserChannels(req.user._id);
-            let favoriteChannels: Channel[] =
-                await this.channelRepository.findUserFavoriteChannels(
-                    req.user._id
-                );
-
-            return {
-                favorites: favoriteChannels,
-                channels: userChannels
-            };
+            return await this.channelRepository.find(
+                { createdBy: req.user._id },
+                null,
+                'createdBy'
+            );
         } catch (error) {
             throw error;
         }
     }
 
-    // async findOne(id: number): Promise<Channel> {
-    //     const channel = await this.channelRepository.findOne(id);
+    async findOne(id: number): Promise<Channel> {
+        const channel = await this.channelRepository.findOne({ id });
 
-    //     if (channel) {
-    //         return channel;
-    //     } else {
-    //         throw new Error(HttpErrorCode.NOT_FOUND);
-    //     }
-    // }
+        if (channel) {
+            return channel;
+        } else {
+            throw new Error(HttpErrorCode.NOT_FOUND);
+        }
+    }
 
-    // async findOneWithUser(channelId: number, userId: string) {
-    //     const channel = await this.channelRepository.findOneWithUser(
-    //         channelId,
-    //         userId
-    //     );
+    async update(id: string, data: IChannel, user: IUser) {
+        const channel: Channel = await this.channelRepository.findById(id);
+        try {
+            if (channel.createdBy.toString() === user._id) {
+                return await this.channelRepository.findOneAndUpdate(
+                    { _id: channel._id },
+                    data
+                );
+            } else {
+                throw new Error(HttpErrorCode.INVALID_PERMISSIONS);
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
 
-    //     if (channel) {
-    //         return channel;
-    //     } else {
-    //         throw new Error(HttpErrorCode.NOT_FOUND);
-    //     }
-    // }
+    async delete(id: string, user: User) {
+        const channel: Channel = await this.channelRepository.findById(id);
 
-    // async update(id: number, data: IChannel, user: IUser) {
-    //     const channel = await this.findOne(id);
-
-    //     try {
-    //         if (channel.createdBy?._id === user._id) {
-    //             const newData = {
-    //                 ...channel,
-    //                 ...omitBy(data, isUndefined)
-    //             };
-
-    //             return await this.channelRepository.save(newData);
-    //         } else {
-    //             throw new Error(HttpErrorCode.INVALID_PERMISSIONS);
-    //         }
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // }
-
-    // async delete(id, user) {
-    //     const channel = await this.findOne(id);
-
-    //     try {
-    //         if (channel.createdBy._id === user._id) {
-    //             return await this.channelRepository.remove(channel);
-    //         } else {
-    //             throw new Error(HttpErrorCode.INVALID_PERMISSIONS);
-    //         }
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // }
+        try {
+            if (channel.createdBy._id.toString() === user._id.toString()) {
+                return await this.channelRepository.deleteOne({
+                    _id: channel._id
+                });
+            } else {
+                throw new Error(HttpErrorCode.INVALID_PERMISSIONS);
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
 
     // async favorite(id: number, user: IUser) {
     //     const channel = await this.findOneWithUser(id, user._id);

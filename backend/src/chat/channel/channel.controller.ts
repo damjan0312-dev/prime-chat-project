@@ -34,89 +34,82 @@ export class ChannelController {
         return await this.channelService.findAll(req);
     }
 
-    // @Get(':id')
-    // async findOne(@Param() params) {
-    //     try {
-    //         return await this.channelService.findOne(Number(params.id));
-    //     } catch (error) {
-    //         switch (error.message) {
-    //             case HttpErrorCode.NOT_FOUND:
-    //                 throw new HttpExceptionCode(
-    //                     HttpStatus.NOT_FOUND,
-    //                     HttpErrorCode.NOT_FOUND,
-    //                     'Channel not found'
-    //                 );
-    //                 break;
+    @Get(':id')
+    async findOne(@Param() params) {
+        try {
+            return await this.channelService.findOne(Number(params.id));
+        } catch (error) {
+            switch (error.message) {
+                case HttpErrorCode.NOT_FOUND:
+                    throw new HttpExceptionCode(
+                        HttpStatus.NOT_FOUND,
+                        HttpErrorCode.NOT_FOUND,
+                        'Channel not found'
+                    );
+                    break;
 
-    //             default:
-    //                 throw new InternalServerErrorException();
-    //         }
-    //     }
-    // }
+                default:
+                    throw new InternalServerErrorException();
+            }
+        }
+    }
 
-    // @Patch(':id')
-    // async update(@Param() params, @Body() body, @Req() req) {
-    //     try {
-    //         return await this.channelService.update(
-    //             Number(params.id),
-    //             body,
-    //             req.user
-    //         );
-    //     } catch (error) {
-    //         switch (error.message) {
-    //             case HttpErrorCode.NOT_FOUND:
-    //                 throw new HttpExceptionCode(
-    //                     HttpStatus.NOT_FOUND,
-    //                     HttpErrorCode.NOT_FOUND,
-    //                     'Channel not found'
-    //                 );
-    //                 break;
+    @Patch(':id')
+    async update(@Param() params, @Body() body, @Req() req) {
+        try {
+            return await this.channelService.update(params.id, body, req.user);
+        } catch (error) {
+            switch (error.message) {
+                case HttpErrorCode.NOT_FOUND:
+                    throw new HttpExceptionCode(
+                        HttpStatus.NOT_FOUND,
+                        HttpErrorCode.NOT_FOUND,
+                        'Channel not found'
+                    );
+                    break;
 
-    //             case HttpErrorCode.INVALID_PERMISSIONS:
-    //                 throw new HttpExceptionCode(
-    //                     HttpStatus.FORBIDDEN,
-    //                     HttpErrorCode.INVALID_PERMISSIONS,
-    //                     'Invalid permissions for resource'
-    //                 );
-    //                 break;
+                case HttpErrorCode.INVALID_PERMISSIONS:
+                    throw new HttpExceptionCode(
+                        HttpStatus.FORBIDDEN,
+                        HttpErrorCode.INVALID_PERMISSIONS,
+                        'Invalid permissions for resource'
+                    );
+                    break;
 
-    //             default:
-    //                 throw new InternalServerErrorException();
-    //         }
-    //     }
-    // }
+                default:
+                    throw new InternalServerErrorException();
+            }
+        }
+    }
 
-    // @Delete(':id')
-    // @HttpCode(204)
-    // async delete(@Param() params, @Req() req) {
-    //     try {
-    //         return await this.channelService.delete(
-    //             Number(params.id),
-    //             req.user
-    //         );
-    //     } catch (error) {
-    //         switch (error.message) {
-    //             case HttpErrorCode.NOT_FOUND:
-    //                 throw new HttpExceptionCode(
-    //                     HttpStatus.NOT_FOUND,
-    //                     HttpErrorCode.NOT_FOUND,
-    //                     'Channel not found'
-    //                 );
-    //                 break;
+    @Delete(':id')
+    @HttpCode(204)
+    async delete(@Param() params, @Req() req) {
+        try {
+            return await this.channelService.delete(params.id, req.user);
+        } catch (error) {
+            switch (error.message) {
+                case HttpErrorCode.NOT_FOUND:
+                    throw new HttpExceptionCode(
+                        HttpStatus.NOT_FOUND,
+                        HttpErrorCode.NOT_FOUND,
+                        'Channel not found'
+                    );
+                    break;
 
-    //             case HttpErrorCode.INVALID_PERMISSIONS:
-    //                 throw new HttpExceptionCode(
-    //                     HttpStatus.FORBIDDEN,
-    //                     HttpErrorCode.INVALID_PERMISSIONS,
-    //                     'Invalid permissions for resource'
-    //                 );
-    //                 break;
+                case HttpErrorCode.INVALID_PERMISSIONS:
+                    throw new HttpExceptionCode(
+                        HttpStatus.FORBIDDEN,
+                        HttpErrorCode.INVALID_PERMISSIONS,
+                        'Invalid permissions for resource'
+                    );
+                    break;
 
-    //             default:
-    //                 throw new InternalServerErrorException();
-    //         }
-    //     }
-    // }
+                default:
+                    throw new InternalServerErrorException();
+            }
+        }
+    }
 
     // @Patch(':id/favorite')
     // async favorite(@Param() params, @Req() req) {

@@ -14,20 +14,4 @@ export class ChannelRepository extends EntityRepository<ChannelDocument> {
     ) {
         super(channelModel);
     }
-
-    async findUserChannels(_id: string): Promise<Channel[]> {
-        try {
-            return (await this.userRepository.findOne({ _id })).channels;
-        } catch (error) {
-            throw error;
-        }
-    }
-    async findUserFavoriteChannels(_id: string): Promise<Channel[]> {
-        try {
-            return (await this.userRepository.findOne({ _id }))
-                .favoriteChannels;
-        } catch (error) {
-            throw error;
-        }
-    }
 }
