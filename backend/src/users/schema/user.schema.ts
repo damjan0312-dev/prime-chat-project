@@ -1,9 +1,9 @@
-import { UserRole } from './../interface/user.interface';
-import { Channel } from './../../chat/channel/channel.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import * as mongoose from 'mongoose';
+import { Document } from 'mongoose';
+import { IChannel } from 'src/chat/channel/channel.interface';
+import { UserRole } from './../interface/user.interface';
 
 export type UserDocument = User & Document;
 
@@ -43,13 +43,13 @@ export class User {
     updatedAt: Date;
 
     @Prop({ default: [] })
-    favoriteChannels: Channel[];
+    favoriteChannels: IChannel[];
 
     @Prop({ default: [] })
-    createdChannels: Channel[];
+    createdChannels: IChannel[];
 
     @Prop({ default: [] })
-    channels: Channel[];
+    channels: IChannel[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

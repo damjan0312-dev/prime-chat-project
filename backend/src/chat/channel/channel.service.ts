@@ -1,20 +1,13 @@
-import { User } from './../../users/schema/user.schema';
-import { ChannelRepository } from './channel.repository';
-import { UserRepository } from '../../users/repositories/user.repository';
-import { IUser } from '../../users/interface/user.interface';
-import { UsersService } from './../../users/service/users.service';
-import { Injectable, Req } from '@nestjs/common';
-import { IChannel } from './channel.interface';
-import {
-    omitBy,
-    isUndefined,
-    cloneDeep,
-    findIndex,
-    differenceBy
-} from 'lodash';
-import { Channel } from './channel.schema';
-import { HttpErrorCode } from 'src/utils/enums/httpErrorCode.enum';
+import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
 import * as mongoose from 'mongoose';
+import { HttpErrorCode } from 'src/utils/enums/httpErrorCode.enum';
+import { IUser } from '../../users/interface/user.interface';
+import { UserRepository } from '../../users/repositories/user.repository';
+import { User } from './../../users/schema/user.schema';
+import { UsersService } from './../../users/service/users.service';
+import { IChannel } from './channel.interface';
+import { ChannelRepository } from './channel.repository';
+import { Channel } from './channel.schema';
 
 @Injectable()
 export class ChannelService {
@@ -24,6 +17,14 @@ export class ChannelService {
         private readonly userRepository: UserRepository
     ) {}
 
+    async findById(id: string) {
+        try {
+            return await this.channelRepository.findById(id, 'members');
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async create(data: Channel, user: User) {
         const channel = new Channel();
         channel._id = new mongoose.Types.ObjectId(data._id);
@@ -31,7 +32,7 @@ export class ChannelService {
         channel.purpose = data.purpose;
         channel.private = data.private;
         channel.createdBy = user._id;
-        //channel.users = [user];
+        channel.members = [user._id];
         return await this.channelRepository.create(channel);
     }
 
@@ -93,32 +94,36 @@ export class ChannelService {
         }
     }
 
-    // async favorite(id: number, user: IUser) {
-    //     const channel = await this.findOneWithUser(id, user._id);
+    async addMembers(id: string, data: string[], user: IUser) {
+        const channel: Channel = await this.channelRepository.findById(id);
+        try {
+            if (channel.createdBy.toString() === user._id) {
+                const newData = {
+                    members: [
+                        ...channel.members,
+                        ...data.map((id) => new mongoose.Types.ObjectId(id))
+                    ]
+                };
 
-    //     try {
-    //         const completedUser = await this.usersService.getByEmail(
-    //             user.email,
-    //             true
-    //         );
-    //         const favoriteChannels = cloneDeep(completedUser.favoriteChannels);
-    //         const favoriteChannelIndex = findIndex(
-    //             favoriteChannels,
-    //             (element) => element.id === id
-    //         );
+                return await this.channelRepository.findOneAndUpdate(
+                    { _id: channel._id },
+                    newData
+                );
+            } else {
+                throw new Error(HttpErrorCode.INVALID_PERMISSIONS);
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
 
-    //         if (favoriteChannelIndex > -1) {
-    //             favoriteChannels.splice(favoriteChannelIndex, 1);
-    //         } else {
-    //             favoriteChannels.unshift(channel);
-    //         }
-
-    //         this.userRepository.create({
-    //             ...completedUser,
-    //             favoriteChannels
-    //         });
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // }
+    async getFavorites(user: IUser) {
+        try {
+            return await (
+                await this.userRepository.findById(user._id)
+            ).favoriteChannels;
+        } catch (error) {
+            throw error;
+        }
+    }
 }

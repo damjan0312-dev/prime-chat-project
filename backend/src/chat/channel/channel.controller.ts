@@ -1,25 +1,26 @@
-import { Channel } from 'src/chat/channel/channel.schema';
 import {
-    Controller,
-    UseGuards,
-    Post,
     Body,
-    Req,
+    Controller,
+    Delete,
     Get,
+    HttpException,
     HttpStatus,
-    InternalServerErrorException,
+    NotFoundException,
     Param,
     Patch,
-    Delete,
-    HttpCode
+    Post,
+    Req,
+    UseFilters,
+    UseGuards
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { HttpErrorCode } from 'src/utils/enums/httpErrorCode.enum';
-import { HttpExceptionCode } from 'src/utils/httpExceptionCode.utils';
+import { Channel } from 'src/chat/channel/channel.schema';
+import { HttpExceptionFilter } from 'src/utils/exceptions/http-exception.filter';
 import { IChannel } from './channel.interface';
 import { ChannelService } from './channel.service';
 
 @Controller('channel')
+@UseFilters(new HttpExceptionFilter())
 @UseGuards(JwtAuthGuard)
 export class ChannelController {
     constructor(private readonly channelService: ChannelService) {}
@@ -34,23 +35,29 @@ export class ChannelController {
         return await this.channelService.findAll(req);
     }
 
-    @Get(':id')
-    async findOne(@Param() params) {
+    // MOVE THIS TO USER CONTROLLER
+    @Get('favorites')
+    async getFavorites(@Req() req): Promise<IChannel[]> {
         try {
-            return await this.channelService.findOne(Number(params.id));
+            return await this.channelService.getFavorites(req.user);
         } catch (error) {
-            switch (error.message) {
-                case HttpErrorCode.NOT_FOUND:
-                    throw new HttpExceptionCode(
-                        HttpStatus.NOT_FOUND,
-                        HttpErrorCode.NOT_FOUND,
-                        'Channel not found'
-                    );
-                    break;
+            console.log(error);
+            throw error;
+        }
+    }
 
-                default:
-                    throw new InternalServerErrorException();
-            }
+    @Get(':id')
+    async findById(@Param() params) {
+        try {
+            return await this.channelService.findById(params.id.toString());
+        } catch (error) {
+            throw new HttpException(
+                {
+                    status: HttpStatus.NOT_FOUND,
+                    error: 'Channel Not Found 2'
+                },
+                HttpStatus.NOT_FOUND
+            );
         }
     }
 
@@ -59,78 +66,29 @@ export class ChannelController {
         try {
             return await this.channelService.update(params.id, body, req.user);
         } catch (error) {
-            switch (error.message) {
-                case HttpErrorCode.NOT_FOUND:
-                    throw new HttpExceptionCode(
-                        HttpStatus.NOT_FOUND,
-                        HttpErrorCode.NOT_FOUND,
-                        'Channel not found'
-                    );
-                    break;
+            throw error;
+        }
+    }
 
-                case HttpErrorCode.INVALID_PERMISSIONS:
-                    throw new HttpExceptionCode(
-                        HttpStatus.FORBIDDEN,
-                        HttpErrorCode.INVALID_PERMISSIONS,
-                        'Invalid permissions for resource'
-                    );
-                    break;
-
-                default:
-                    throw new InternalServerErrorException();
-            }
+    @Patch('/addMembers/:id')
+    async addMembers(@Param() params, @Body() body: string[], @Req() req) {
+        try {
+            return await this.channelService.addMembers(
+                params.id,
+                body,
+                req.user
+            );
+        } catch (error) {
+            throw error;
         }
     }
 
     @Delete(':id')
-    @HttpCode(204)
     async delete(@Param() params, @Req() req) {
         try {
             return await this.channelService.delete(params.id, req.user);
         } catch (error) {
-            switch (error.message) {
-                case HttpErrorCode.NOT_FOUND:
-                    throw new HttpExceptionCode(
-                        HttpStatus.NOT_FOUND,
-                        HttpErrorCode.NOT_FOUND,
-                        'Channel not found'
-                    );
-                    break;
-
-                case HttpErrorCode.INVALID_PERMISSIONS:
-                    throw new HttpExceptionCode(
-                        HttpStatus.FORBIDDEN,
-                        HttpErrorCode.INVALID_PERMISSIONS,
-                        'Invalid permissions for resource'
-                    );
-                    break;
-
-                default:
-                    throw new InternalServerErrorException();
-            }
+            throw error;
         }
     }
-
-    // @Patch(':id/favorite')
-    // async favorite(@Param() params, @Req() req) {
-    //     try {
-    //         return await this.channelService.favorite(
-    //             Number(params.id),
-    //             req.user
-    //         );
-    //     } catch (error) {
-    //         switch (error.message) {
-    //             case HttpErrorCode.NOT_FOUND:
-    //                 throw new HttpExceptionCode(
-    //                     HttpStatus.NOT_FOUND,
-    //                     HttpErrorCode.NOT_FOUND,
-    //                     'Channel not found'
-    //                 );
-    //                 break;
-
-    //             default:
-    //                 throw new InternalServerErrorException();
-    //         }
-    //     }
-    // }
 }

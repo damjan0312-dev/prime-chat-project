@@ -1,4 +1,4 @@
-import { Channel } from 'src/chat/channel/channel.schema';
+import { IChannel } from 'src/chat/channel/channel.interface';
 
 export interface IUser {
     _id?: string;
@@ -12,9 +12,9 @@ export interface IUser {
     role: UserRole;
     createdAt?: Date;
     updatedAt?: Date;
-    channels: Array<Channel>;
-    createdChannels: Array<Channel>;
-    favoriteChannels: Array<Channel>;
+    channels: Array<IChannel>;
+    createdChannels: Array<IChannel>;
+    favoriteChannels: Array<IChannel>;
 }
 
 export enum UserRole {

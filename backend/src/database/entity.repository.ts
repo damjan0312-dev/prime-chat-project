@@ -10,19 +10,25 @@ import {
 export abstract class EntityRepository<T extends Document> {
     constructor(protected readonly entityModel: Model<T>) {}
 
-    async findById(id: string) {
-        return this.entityModel.findById(new Types.ObjectId(id)).exec();
+    async findById(id: string, populateWith?: string) {
+        return this.entityModel
+            .findById(new Types.ObjectId(id))
+            .populate(populateWith)
+            .exec();
     }
 
     async findOne(
         entityFilterQuery: FilterQuery<T>,
-        projection?: Record<string, unknown>
+        projection?: Record<string, unknown>,
+        populateWith?: string
     ): Promise<T | null> {
+        console.log(entityFilterQuery);
         return this.entityModel
             .findOne(entityFilterQuery, {
                 __v: 0,
                 ...projection
             })
+            .populate(populateWith)
             .exec();
     }
 

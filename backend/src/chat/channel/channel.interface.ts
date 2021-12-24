@@ -6,4 +6,5 @@ export class IChannel {
     readonly private: boolean;
     readonly purpose: string;
     readonly createdBy: IUser; // id of the user
+    readonly members: IUser[];
 }
