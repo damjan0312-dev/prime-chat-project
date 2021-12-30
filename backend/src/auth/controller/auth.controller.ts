@@ -29,10 +29,4 @@ export class AuthController {
     async signIn(@Request() req) {
         return this.authService.signIn(req.user);
     }
-
-    @UseGuards(JwtAuthGuard)
-    @Get('me')
-    getMe(@Request() req) {
-        return req.user;
-    }
 }

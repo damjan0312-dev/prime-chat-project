@@ -3,9 +3,7 @@ import {
     Controller,
     Delete,
     Get,
-    HttpException,
     HttpStatus,
-    NotFoundException,
     Param,
     Patch,
     Post,
@@ -15,19 +13,42 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Channel } from 'src/chat/channel/channel.schema';
+import { ErrorBuilder } from 'src/utils/exceptions/exception.builder';
 import { HttpExceptionFilter } from 'src/utils/exceptions/http-exception.filter';
-import { IChannel } from './channel.interface';
+import { UsersService } from './../../users/service/users.service';
 import { ChannelService } from './channel.service';
 
 @Controller('channel')
 @UseFilters(new HttpExceptionFilter())
 @UseGuards(JwtAuthGuard)
 export class ChannelController {
-    constructor(private readonly channelService: ChannelService) {}
+    constructor(
+        private readonly channelService: ChannelService,
+        private readonly userService: UsersService
+    ) {}
 
     @Post()
     async create(@Body() body: Channel, @Req() req) {
-        return await this.channelService.create(body, req.user);
+        try {
+            const channel = await this.channelService.create(body, req.user);
+            const updateUser = await this.userService.updateCreatedChannels(
+                req.user._id,
+                channel._id
+            );
+
+            if (channel && updateUser) {
+                return channel;
+            } else
+                throw ErrorBuilder(
+                    HttpStatus.FORBIDDEN,
+                    'Invalid permissions.'
+                );
+        } catch (error) {
+            throw ErrorBuilder(
+                HttpStatus.CONFLICT,
+                'Channel with that name already exists.'
+            );
+        }
     }
 
     @Get()
@@ -35,29 +56,12 @@ export class ChannelController {
         return await this.channelService.findAll(req);
     }
 
-    // MOVE THIS TO USER CONTROLLER
-    @Get('favorites')
-    async getFavorites(@Req() req): Promise<IChannel[]> {
-        try {
-            return await this.channelService.getFavorites(req.user);
-        } catch (error) {
-            console.log(error);
-            throw error;
-        }
-    }
-
     @Get(':id')
     async findById(@Param() params) {
         try {
             return await this.channelService.findById(params.id.toString());
         } catch (error) {
-            throw new HttpException(
-                {
-                    status: HttpStatus.NOT_FOUND,
-                    error: 'Channel Not Found 2'
-                },
-                HttpStatus.NOT_FOUND
-            );
+            throw ErrorBuilder(HttpStatus.NOT_FOUND, 'Channel not found.');
         }
     }
 

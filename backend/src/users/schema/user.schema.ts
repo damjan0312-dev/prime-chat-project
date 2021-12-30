@@ -42,8 +42,8 @@ export class User {
     @Prop({ default: null })
     updatedAt: Date;
 
-    @Prop({ default: [] })
-    favoriteChannels: IChannel[];
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'CHANNEL', default: [] })
+    favoriteChannels: mongoose.Types.ObjectId[];
 
     @Prop({ default: [] })
     createdChannels: IChannel[];

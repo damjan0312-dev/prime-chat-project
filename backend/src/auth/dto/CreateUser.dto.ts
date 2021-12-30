@@ -8,6 +8,7 @@ import {
     MinLength
 } from 'class-validator';
 import { Channel } from 'src/chat/channel/channel.schema';
+import * as mongoose from 'mongoose';
 
 export class CreateUserDto {
     @IsString()
@@ -38,5 +39,5 @@ export class CreateUserDto {
     // readonly updatedAt?: Date;
     // readonly channels: Array<Channel>;
     // readonly createdChannels: Array<Channel>;
-    // readonly favoriteChannels: Array<Channel>;
+    readonly favoriteChannels: Array<mongoose.Types.ObjectId>;
 }

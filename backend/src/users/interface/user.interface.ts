@@ -1,5 +1,5 @@
 import { IChannel } from 'src/chat/channel/channel.interface';
-
+import * as mongoose from 'mongoose';
 export interface IUser {
     _id?: string;
     fullname: string;
@@ -14,7 +14,7 @@ export interface IUser {
     updatedAt?: Date;
     channels: Array<IChannel>;
     createdChannels: Array<IChannel>;
-    favoriteChannels: Array<IChannel>;
+    favoriteChannels: Array<mongoose.Types.ObjectId>;
 }
 
 export enum UserRole {

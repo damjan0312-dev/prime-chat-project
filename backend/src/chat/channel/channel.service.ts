@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
 import * as mongoose from 'mongoose';
 import { HttpErrorCode } from 'src/utils/enums/httpErrorCode.enum';
+import { ErrorBuilder } from 'src/utils/exceptions/exception.builder';
 import { IUser } from '../../users/interface/user.interface';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { User } from './../../users/schema/user.schema';
@@ -21,19 +22,24 @@ export class ChannelService {
         try {
             return await this.channelRepository.findById(id, 'members');
         } catch (error) {
-            throw error;
+            throw ErrorBuilder(HttpStatus.NOT_FOUND, 'Channel not found.');
         }
     }
 
     async create(data: Channel, user: User) {
-        const channel = new Channel();
-        channel._id = new mongoose.Types.ObjectId(data._id);
-        channel.name = data.name;
-        channel.purpose = data.purpose;
-        channel.private = data.private;
-        channel.createdBy = user._id;
-        channel.members = [user._id];
-        return await this.channelRepository.create(channel);
+        try {
+            const channel = new Channel();
+            channel._id = new mongoose.Types.ObjectId(data._id);
+            channel.name = data.name;
+            channel.purpose = data.purpose;
+            channel.private = data.private;
+            channel.createdBy = user._id;
+            channel.members = [user._id];
+
+            return await this.channelRepository.create(channel);
+        } catch (error) {
+            throw error;
+        }
     }
 
     /**
@@ -48,7 +54,7 @@ export class ChannelService {
                 'createdBy'
             );
         } catch (error) {
-            throw error;
+            throw ErrorBuilder(HttpStatus.NOT_FOUND, 'User not found.');
         }
     }
 
@@ -58,7 +64,7 @@ export class ChannelService {
         if (channel) {
             return channel;
         } else {
-            throw new Error(HttpErrorCode.NOT_FOUND);
+            throw ErrorBuilder(HttpStatus.NOT_FOUND, 'Channel not found.');
         }
     }
 
@@ -71,7 +77,10 @@ export class ChannelService {
                     data
                 );
             } else {
-                throw new Error(HttpErrorCode.INVALID_PERMISSIONS);
+                throw ErrorBuilder(
+                    HttpStatus.FORBIDDEN,
+                    'Invalid permissions.'
+                );
             }
         } catch (error) {
             throw error;
@@ -87,10 +96,13 @@ export class ChannelService {
                     _id: channel._id
                 });
             } else {
-                throw new Error(HttpErrorCode.INVALID_PERMISSIONS);
+                throw ErrorBuilder(
+                    HttpStatus.FORBIDDEN,
+                    'Invalid permissions.'
+                );
             }
         } catch (error) {
-            throw error;
+            throw ErrorBuilder(HttpStatus.NOT_FOUND, 'Channel not found.');
         }
     }
 
@@ -110,20 +122,13 @@ export class ChannelService {
                     newData
                 );
             } else {
-                throw new Error(HttpErrorCode.INVALID_PERMISSIONS);
+                throw ErrorBuilder(
+                    HttpStatus.FORBIDDEN,
+                    'Invalid permissions.'
+                );
             }
         } catch (error) {
-            throw error;
-        }
-    }
-
-    async getFavorites(user: IUser) {
-        try {
-            return await (
-                await this.userRepository.findById(user._id)
-            ).favoriteChannels;
-        } catch (error) {
-            throw error;
+            throw ErrorBuilder(HttpStatus.NOT_FOUND, 'Channel not found.');
         }
     }
 }

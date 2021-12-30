@@ -5,14 +5,13 @@ import { Document } from 'mongoose';
 export type ChannelDocument = Channel & Document;
 
 @Schema({
-    _id: false,
     timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' }
 })
 export class Channel {
     @Prop({ type: mongoose.Types.ObjectId })
     _id: mongoose.Types.ObjectId;
 
-    @Prop({ required: true, length: 24 })
+    @Prop({ unique: true, required: true, length: 24 })
     name: string;
 
     @Prop({ required: true, length: 128, nullable: true })
@@ -24,7 +23,7 @@ export class Channel {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'USER' })
     createdBy: mongoose.Types.ObjectId;
 
-    @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'USER', default: [] })
+    @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'USER' })
     members: mongoose.Types.ObjectId[];
 }
 
